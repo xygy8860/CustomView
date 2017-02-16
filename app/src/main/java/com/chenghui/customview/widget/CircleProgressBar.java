@@ -1,7 +1,6 @@
 package com.chenghui.customview.widget;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -9,7 +8,6 @@ import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.chenghui.customview.R;
 import com.chenghui.customview.utils.PxUtils;
 
 /**
@@ -27,7 +25,7 @@ public class CircleProgressBar extends View {
     private int mHeight;
     private int mWidth;
     //动画位置百分比进度
-    private int mCurPercent;
+    private int mCurPercent = 0;
     //实际百分比进度
     private int mPercent;
     //圆心坐标
@@ -37,16 +35,19 @@ public class CircleProgressBar extends View {
     //要画的弧度
     private int mEndAngle;
     //小圆的颜色
-    private int mSmallColor;
+    private int mSmallColor = 0xffafb4db; // 默认颜色
     //大圆颜色
-    private int mBigColor;
+    private int mBigColor = 0xff6950a1;
 
     //中心百分比文字大小
     private float mCenterTextSize;
 
     // 大圆画笔
-    private Paint bigCirclePaint = new Paint();
-    private Paint sectorPaint = new Paint();
+    private Paint bigCirclePaint;
+    private Paint sectorPaint;
+    private Paint smallCirclePaint;
+    private Paint textPaint;
+    private RectF rect;
 
     // 将前面二个构造函数都指向第三个
     public CircleProgressBar(Context context) {
@@ -62,13 +63,29 @@ public class CircleProgressBar extends View {
         super(context, attrs, defStyleAttr);
         // 获取自定义属性
         // 用户可以根据自定义属性来控制自定义view的展现形式
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CirclePercentView1, defStyleAttr, 0);
-        mStripeWidth = a.getDimension(R.styleable.CirclePercentView1_stripeWidth, PxUtils.dpToPx(30, context));
-        mCurPercent = a.getInteger(R.styleable.CirclePercentView1_percent, 0);
-        mSmallColor = a.getColor(R.styleable.CirclePercentView1_smallColor, 0xffafb4db);
-        mBigColor = a.getColor(R.styleable.CirclePercentView1_bigColor, 0xff6950a1);
-        mCenterTextSize = a.getDimensionPixelSize(R.styleable.CirclePercentView1_centerTextSize, PxUtils.spToPx(20, context));
-        mRadius = a.getDimensionPixelSize(R.styleable.CirclePercentView1_radius, PxUtils.dpToPx(100, context));
+        mStripeWidth = PxUtils.dpToPx(30, context);
+        mCenterTextSize = PxUtils.spToPx(20, context);
+        mRadius = PxUtils.dpToPx(100, context);
+
+        //绘制大圆
+        bigCirclePaint = new Paint();
+        bigCirclePaint.setAntiAlias(true); // 抗锯齿
+        bigCirclePaint.setColor(mBigColor); // 设置大圆颜色
+
+        //绘制小圆,颜色透明
+        smallCirclePaint = new Paint();
+        smallCirclePaint.setAntiAlias(true);
+        smallCirclePaint.setColor(mBigColor);
+
+        // 饼状图
+        rect = new RectF();
+        sectorPaint = new Paint();
+        sectorPaint.setColor(mSmallColor);
+        sectorPaint.setAntiAlias(true);
+
+        // 文字画笔
+        textPaint = new Paint();
+        textPaint.setColor(Color.WHITE);
     }
 
     @Override
@@ -100,33 +117,19 @@ public class CircleProgressBar extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         // 绘制圆弧弧度
-        mEndAngle = (int) (mCurPercent * 3.6);
-        //绘制大圆
-        bigCirclePaint.setAntiAlias(true); // 抗锯齿
-        bigCirclePaint.setColor(mBigColor); // 设置大圆颜色
+        mEndAngle = (int) (mCurPercent * 3.6); // 百分比*360度即为弧度
+        // 大圆
         canvas.drawCircle(x, y, mRadius, bigCirclePaint); // 通过canvas画圆
-
         //饼状图
-        sectorPaint.setColor(mSmallColor);
-        sectorPaint.setAntiAlias(true);
-        RectF rect = new RectF(0, 0, mWidth, mHeight);
-
+        rect.intersect(0, 0, mWidth, mHeight);
         canvas.drawArc(rect, 270, mEndAngle, true, sectorPaint);
-
-
-        //绘制小圆,颜色透明
-        Paint smallCirclePaint = new Paint();
-        smallCirclePaint.setAntiAlias(true);
-        smallCirclePaint.setColor(mBigColor);
+        // 小圆
         canvas.drawCircle(x, y, mRadius - mStripeWidth, smallCirclePaint);
 
         //绘制文本
-        Paint textPaint = new Paint();
         String text = mCurPercent + "%";
         textPaint.setTextSize(mCenterTextSize);
         float textLength = textPaint.measureText(text);
-
-        textPaint.setColor(Color.WHITE);
         canvas.drawText(text, x - textLength / 2, y, textPaint);
     }
 
