@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--旋转动画-->
+    <!--含义表示从0到359度开始循环旋转，
+    0-359(若设置成360在停止时会出现停顿现象)度旋转所用时间为500ms，
+    旋转中心距离view的左顶点为50%距离，距离view的上边缘为50%距离，
+    即正中心，具体每个含义见下面的具体属性介绍。 -->
+    <rotate
+        android:fromDegrees="0"
+        android:toDegrees="359"
+        android:duration="1000"
+        android:repeatCount="-1"
+        android:pivotX="50%"
+        android:pivotY="50%" />
+</set>

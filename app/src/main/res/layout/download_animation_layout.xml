@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.chenghui.customview.widget.DownloadStartLayout
+        android:id="@+id/download_progress_start"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <RelativeLayout
+        android:id="@+id/download_progress_layout"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+
+        >
+
+        <ProgressBar
+            android:id="@+id/download_progressbar"
+            style="@style/progressbar"
+            android:layout_width="fill_parent"
+            android:layout_height="40dp"
+            android:max="100" />
+
+        <RelativeLayout
+            android:id="@+id/download_progress_balls_container"
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:layout_marginRight="-5.0dip"
+            android:layout_toLeftOf="@+id/download_progress_img">
+
+            <View
+                android:id="@+id/download_progress_ball1"
+                android:layout_width="10.0dip"
+                android:layout_height="10.0dip"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/_360_round_bg"
+                 />
+
+            <View
+                android:id="@+id/download_progress_ball2"
+                android:layout_width="4.0dip"
+                android:layout_height="4.0dip"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/_360_round_bg"
+                 />
+
+            <View
+                android:id="@+id/download_progress_ball3"
+                android:layout_width="6.0dip"
+                android:layout_height="6.0dip"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/_360_round_bg"
+                />
+
+            <View
+                android:id="@+id/download_progress_ball4"
+                android:layout_width="8.0dip"
+                android:layout_height="8.0dip"
+                android:background="@drawable/_360_round_bg"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                 />
+        </RelativeLayout>
+
+        <ImageView
+            android:id="@+id/download_progress_img"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/_360_btn_bg"
+            android:src="@drawable/download_progress_img" />
+
+        <TextView
+            android:id="@+id/download_progress_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="0%"
+            android:textColor="@color/white"
+            android:textSize="18sp" />
+
+    </RelativeLayout>
+
+</merge>

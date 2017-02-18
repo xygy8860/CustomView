@@ -5,15 +5,22 @@
     android:gravity="center"
     android:orientation="vertical">
 
+    <com.chenghui.customview.widget.DownloadView
+        android:id="@+id/progressbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp" />
+
     <com.chenghui.customview.widget.CircleProgressBar
         android:id="@+id/circleView"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
 
     <Button
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:text="change" />
+        android:text="button" />
 </LinearLayout>

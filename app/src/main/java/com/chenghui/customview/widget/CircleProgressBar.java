@@ -116,13 +116,14 @@ public class CircleProgressBar extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        // 绘制圆弧弧度
-        mEndAngle = (int) (mCurPercent * 3.6); // 百分比*360度即为弧度
         // 大圆
         canvas.drawCircle(x, y, mRadius, bigCirclePaint); // 通过canvas画圆
+
         //饼状图
         rect.intersect(0, 0, mWidth, mHeight);
+        mEndAngle = (int) (mCurPercent * 3.6); // 百分比*360度即为弧度
         canvas.drawArc(rect, 270, mEndAngle, true, sectorPaint);
+
         // 小圆
         canvas.drawCircle(x, y, mRadius - mStripeWidth, smallCirclePaint);
 
