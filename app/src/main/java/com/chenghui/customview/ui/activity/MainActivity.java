@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
             if (progress <= 100) {
                 try {
                     mProgressBar.setProgress(progress);
-                    //progress++;
+                    progress++;
                     mProgressBar.postDelayed(mRunnble, 100);
                 } catch (Exception e) {
                     e.printStackTrace();

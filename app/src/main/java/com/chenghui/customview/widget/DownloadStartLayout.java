@@ -58,6 +58,17 @@ public class DownloadStartLayout extends RelativeLayout {
     }
 
     /**
+     * 下载完成
+     * @param str
+     */
+    public void setText(String str){
+        mDownloadTxt.setText(str);
+        mDownloadTxt.setVisibility(VISIBLE);
+        mDownloadImg.clearAnimation();
+        mDownloadImg.setVisibility(GONE);
+    }
+
+    /**
      * 开始动画
      *
      * @param listener 动画完成监听器
@@ -122,6 +133,7 @@ public class DownloadStartLayout extends RelativeLayout {
                     mDownloadLayout.postDelayed(mRunnable, mSpaceTime);
                 }else{
                     if(mOnCompleteListener != null){
+                        mDownloadImg.clearAnimation();
                         mOnCompleteListener.complete(mDownloadLayout);
                     }
                 }

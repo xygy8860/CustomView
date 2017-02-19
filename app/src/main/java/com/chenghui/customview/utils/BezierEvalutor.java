@@ -20,7 +20,7 @@ public class BezierEvalutor implements TypeEvaluator<PointF> {
         PointF point = new PointF();
         // 正弦波公式  y = Asin(Tx+w)+k
         point.x = p0.x - (p0.x - p3.x) * t;
-        point.y = (float) (mA * Math.sin(2 * Math.PI / (p0.x - p3.x) * (point.x - p3.x))) + mA;
+        point.y = (float) (mA * Math.sin(3 * Math.PI / (p0.x - p3.x) * (point.x - p3.x))) + mA;
         return point;//实时返回最新计算出的点对象
     }
 

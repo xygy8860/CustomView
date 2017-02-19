@@ -1,13 +1,16 @@
 package com.chenghui.customview.widget;
 
+import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.PointF;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
@@ -26,8 +29,6 @@ import com.chenghui.customview.utils.BezierEvalutor;
  */
 public class DownloadView extends RelativeLayout {
 
-    private View mBall2;
-    private View mBall1;
     private DownloadStartLayout mDownloadStart; // 自定义view 控制下载开始前动画
     private RelativeLayout mProgressLayout; // 下载根布局
 
@@ -35,11 +36,16 @@ public class DownloadView extends RelativeLayout {
     private ImageView mProgressImg; // 右侧旋转动画图标
     private TextView mProgressTxt; // 显示下载进度
 
-    private OnCompleteListener mListener;
-    private int mWidth;
-    private int mHeight;
-    private float mStartX;
-    private float mStartY;
+    private View mBall1; // 四个动画小球
+    private View mBall2;
+    private View mBall3;
+    private View mBall4;
+
+    private int mHeight; // 布局高度
+    private OnCompleteListener mListener; // 下载开始动画完成监听，完成后可传入下载进度
+
+    private TimeRunnable runnable; // 定时器
+    private Handler handler = new Handler();
 
     public interface OnCompleteListener { // 开始动画完成监听
         void startComplete();
@@ -57,7 +63,8 @@ public class DownloadView extends RelativeLayout {
         mProgressTxt = (TextView) v.findViewById(R.id.download_progress_txt);
         mBall1 = v.findViewById(R.id.download_progress_ball1);
         mBall2 = v.findViewById(R.id.download_progress_ball2);
-
+        mBall3 = v.findViewById(R.id.download_progress_ball3);
+        mBall4 = v.findViewById(R.id.download_progress_ball4);
     }
 
     public void start(OnCompleteListener listener) {
@@ -80,9 +87,23 @@ public class DownloadView extends RelativeLayout {
             throw new Exception(" progeress must less than 100");
         } else if (progress < 0) {
             throw new Exception(" progeress must more than 0");
-        } else {
+        } else if(progress < 100){
             mProgressBar.setProgress(progress);
             mProgressTxt.setText(progress + "%");
+        } else { // 下载完成
+            mProgressLayout.setVisibility(GONE);
+            mDownloadStart.setVisibility(VISIBLE);
+            mDownloadStart.setText("下载完成");
+
+            handler.removeCallbacks(runnable);
+
+            // 结束动画
+            mBall1.clearAnimation();
+            mBall2.clearAnimation();
+            mBall3.clearAnimation();
+            mBall4.clearAnimation();
+
+            mProgressImg.clearAnimation();
         }
     }
 
@@ -97,34 +118,43 @@ public class DownloadView extends RelativeLayout {
 
         mListener.startComplete();
 
-        mWidth = mProgressLayout.getWidth();
-        mHeight = mProgressLayout.getHeight();
-
-        startBeziAnimator();
+        // 布局完成监听，不然 mProgressLayout.getWidth() 获得值为0
+        final ViewTreeObserver vto2 = mProgressLayout.getViewTreeObserver();
+        vto2.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                mHeight = mProgressLayout.getHeight();
+                runnable = new TimeRunnable();
+                handler.post(runnable);
+                // 可能会多次调用，需要移除监听器
+                vto2.removeGlobalOnLayoutListener(this);
+            }
+        });
     }
 
     // 开始贝塞尔曲线动画
-    private void startBeziAnimator() {
+    private void startBeziAnimator(View view, int duration) {
 
-        ValueAnimator bezierValueAnimator = getBeziValueAnimator(mBall1,3000);
+        ValueAnimator bezierValueAnimator = getBeziValueAnimator(view, duration);
         AnimatorSet bezierAnimatorSet = new AnimatorSet();
         //按顺序播放动画
         bezierAnimatorSet.playSequentially(bezierValueAnimator);//然后按顺序播放这些动画集合
-        bezierAnimatorSet.setTarget(mBall1);
+        bezierAnimatorSet.setTarget(view);
         bezierAnimatorSet.start();
     }
 
     /**
      * @author mikyou getBeziValueAnimator 构造一个贝塞尔曲线动画
      */
-    private ValueAnimator getBeziValueAnimator(final View view,int duration) {
-        float x = view.getX();
-        float y = view.getY();
+    private ValueAnimator getBeziValueAnimator(final View view, int duration) {
 
-        // 贝塞尔曲线动画,不断修改ImageView的坐标,PointF(x,y)
-        PointF pointF0 = new PointF(x, y + view.getHeight()/2);// 创建P0点，起点
-        PointF pointF3 = new PointF(-view.getHeight(), mProgressLayout.getHeight()/2);// 创建P3点，终点
-        BezierEvalutor mBezierEvalutor = new BezierEvalutor(view.getHeight(), mProgressLayout.getHeight());// 创建一个估值器，然后并把P1，P2点传入
+        final float x = view.getX();
+        final float y = view.getY();
+
+        // 正弦波动画,不断修改View的坐标,PointF(x,y)
+        PointF pointF0 = new PointF(x, y + view.getHeight() / 2);// 创建P0点，起点
+        PointF pointF3 = new PointF(-view.getHeight(), mHeight / 2);// 创建P3点，终点
+        BezierEvalutor mBezierEvalutor = new BezierEvalutor(view.getHeight(), mHeight);// 创建一个估值器
         /**
          * @author zhongqihong
          *         创建一个ValueAnimator，并把起点P0和终点P3传入,然后在BezierEvalutor重写的方法evalute中得到P0
@@ -141,11 +171,69 @@ public class DownloadView extends RelativeLayout {
                 PointF pointF = (PointF) animation.getAnimatedValue(); // 通过addUpdateListener监听事件实时获得从mBezierEvalutor估值器对象evalute方法实时计算出最新点的坐标
                 view.setX(pointF.x);// 然后去更新该爱心ImageView的X,Y坐标
                 view.setY(pointF.y);
-                Log.e("123","point: x ：" + pointF.x + "  y: " + pointF.y);
+                Log.e("123", "point: x ：" + pointF.x + "  y: " + pointF.y);
             }
         });
         animator.setTarget(view);
         animator.setDuration(duration);
+        animator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                // 动画结束，恢复初始位置
+                view.setX(x);
+                view.setY(y);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
         return animator;
+    }
+
+    class TimeRunnable implements Runnable {
+
+        int action = 0; // 初始
+
+        @Override
+        public void run() {
+            switch (action) {
+                case 0: // ball1
+                    action++;
+                    startBeziAnimator(mBall1, 1800);
+                    handler.postDelayed(runnable, 50);
+                    break;
+                case 1: // ball2
+                    action++;
+                    startBeziAnimator(mBall2, 1850);
+                    handler.postDelayed(runnable, 50);
+                    break;
+                case 2: // ball3
+                    action++;
+                    startBeziAnimator(mBall3, 1900);
+                    handler.postDelayed(runnable, 50);
+                    break;
+                case 3: // ball4
+                    action++;
+                    startBeziAnimator(mBall4, 1950);
+                    handler.postDelayed(runnable, 50);
+                    break;
+                case 4: // 一个循环结束
+                    action = 0;
+                    handler.postDelayed(runnable, 2000);
+                    break;
+            }
+        }
     }
 }
