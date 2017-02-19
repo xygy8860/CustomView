@@ -1,10 +1,9 @@
-package com.chenghui.customview.ui.activity;
+package com.example.demo;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
-import com.chenghui.customview.R;
 import com.chenghui.customview.widget.CircleProgressBar;
 import com.chenghui.customview.widget.DownloadView;
 
