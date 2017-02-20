@@ -12,7 +12,7 @@ import com.chenghui.customview.utils.PxUtils;
 
 /**
  * Created by sunqinwei on 2017/2/10.
- * <p/>
+ * <p>
  * 圆形百分比进度条
  */
 public class CircleProgressBar extends View {
@@ -26,18 +26,16 @@ public class CircleProgressBar extends View {
     private int mWidth;
     //动画位置百分比进度
     private int mCurPercent = 0;
-    //实际百分比进度
-    private int mPercent;
     //圆心坐标
     private float x;
     private float y;
 
     //要画的弧度
     private int mEndAngle;
-    //小圆的颜色
-    private int mSmallColor = 0xffafb4db; // 默认颜色
-    //大圆颜色
-    private int mBigColor = 0xff6950a1;
+    //圆弧的颜色
+    private int mAngleColor = 0xffafb4db; // 默认颜色
+    //圆的颜色
+    private int mCircleColor = 0xff6950a1;
 
     //中心百分比文字大小
     private float mCenterTextSize;
@@ -61,29 +59,29 @@ public class CircleProgressBar extends View {
 
     public CircleProgressBar(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        // 获取自定义属性
-        // 用户可以根据自定义属性来控制自定义view的展现形式
+
+        // 默认值，色带宽度，文字大小等
         mStripeWidth = PxUtils.dpToPx(30, context);
         mCenterTextSize = PxUtils.spToPx(20, context);
         mRadius = PxUtils.dpToPx(100, context);
 
-        //绘制大圆
+        //绘制大圆画笔属性设置
         bigCirclePaint = new Paint();
         bigCirclePaint.setAntiAlias(true); // 抗锯齿
-        bigCirclePaint.setColor(mBigColor); // 设置大圆颜色
+        bigCirclePaint.setColor(mCircleColor); // 设置大圆颜色
 
-        //绘制小圆,颜色透明
+        //绘制小圆画笔属性设置
         smallCirclePaint = new Paint();
         smallCirclePaint.setAntiAlias(true);
-        smallCirclePaint.setColor(mBigColor);
+        smallCirclePaint.setColor(mCircleColor);
 
-        // 饼状图
+        // 饼状图属性
         rect = new RectF();
         sectorPaint = new Paint();
-        sectorPaint.setColor(mSmallColor);
+        sectorPaint.setColor(mAngleColor);
         sectorPaint.setAntiAlias(true);
 
-        // 文字画笔
+        // 文字画笔属性
         textPaint = new Paint();
         textPaint.setColor(Color.WHITE);
     }
@@ -116,12 +114,16 @@ public class CircleProgressBar extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
+
+        mEndAngle = (int) (mCurPercent * 3.6);
+
         // 大圆
         canvas.drawCircle(x, y, mRadius, bigCirclePaint); // 通过canvas画圆
 
         //饼状图
-        rect.intersect(0, 0, mWidth, mHeight);
-        mEndAngle = (int) (mCurPercent * 3.6); // 百分比*360度即为弧度
+        rect.right = mWidth;
+        rect.bottom = mHeight;
+        //参数说明见知识补充
         canvas.drawArc(rect, 270, mEndAngle, true, sectorPaint);
 
         // 小圆
@@ -131,42 +133,50 @@ public class CircleProgressBar extends View {
         String text = mCurPercent + "%";
         textPaint.setTextSize(mCenterTextSize);
         float textLength = textPaint.measureText(text);
-        canvas.drawText(text, x - textLength / 2, y, textPaint);
+        canvas.drawText(text, x - textLength / 2, y + mCenterTextSize / 2, textPaint);
     }
 
-    //外部设置百分比数
+    // 外部设置百分比数
     public void setPercent(int percent) {
-        if (percent > 100) {
-            throw new IllegalArgumentException("percent must less than 100!");
+        if (percent < 0 || percent > 100) {
+            throw new IllegalArgumentException("percent must more than 0 and less than 100!");
         }
-        setCurPercent(percent);
+        mCurPercent = percent;
+        invalidate();
     }
 
-    //内部设置百分比 用于动画效果
-    private void setCurPercent(int percent) {
 
-        mPercent = percent;
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                int sleepTime = 1;
-                for (int i = 0; i < mPercent; i++) {
-                    if (i % 20 == 0) {
-                        sleepTime += 2;
-                    }
-                    try {
-                        Thread.sleep(sleepTime);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    mCurPercent = i;
-                    CircleProgressBar.this.postInvalidate();
-                }
-            }
-
-        }).start();
-
+    // 设置圆的颜色
+    public void setCircleColor(int mCircleColor) {
+        this.mCircleColor = mCircleColor;
+        smallCirclePaint.setColor(mCircleColor);
+        bigCirclePaint.setColor(mCircleColor);
+        // 此方法是为了使布局生效
+        invalidate();
     }
 
+    // 设置圆弧的颜色
+    public void setAngleColor(int mAngleColor) {
+        this.mAngleColor = mAngleColor;
+        sectorPaint.setColor(mAngleColor);
+        invalidate();
+    }
+
+    // 设置色带宽度
+    public void setStripeWidth(float mStripeWidth) {
+        this.mStripeWidth = mStripeWidth;
+        invalidate();
+    }
+
+    // 设置字体颜色
+    public void setCenterTextColor(int color) {
+        textPaint.setColor(color);
+        invalidate();
+    }
+
+    // 设置字体大小
+    public void setmCenterTextSize(float mCenterTextSize) {
+        this.mCenterTextSize = mCenterTextSize;
+        invalidate();
+    }
 }

@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
+import com.chenghui.customview.utils.PxUtils;
 import com.chenghui.customview.widget.CircleProgressBar;
 import com.chenghui.customview.widget.DownloadView;
 
@@ -23,11 +24,17 @@ public class MainActivity extends AppCompatActivity {
 
         mRunnble = new TimeRunnable();
 
+        mPro.setCircleColor(getResources().getColor(R.color.lightgreen));
+        mPro.setAngleColor(getResources().getColor(R.color.orange));
+        mPro.setStripeWidth(PxUtils.dpToPx(10, this));
+        mPro.setCenterTextColor(getResources().getColor(R.color.red));
+        mPro.setmCenterTextSize(PxUtils.spToPx(30,this));
+
         findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int n = 80;
-                mPro.setPercent(n);
+                //mPro.setPercent(n);
 
                 mProgressBar.start(new DownloadView.OnCompleteListener() {
                     @Override
@@ -47,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             if (progress <= 100) {
                 try {
-                    mProgressBar.setProgress(progress);
+                    mPro.setPercent(progress);
                     progress++;
                     mProgressBar.postDelayed(mRunnble, 100);
                 } catch (Exception e) {
