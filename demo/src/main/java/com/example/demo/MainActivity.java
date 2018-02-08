@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
         mPro.setAngleColor(getResources().getColor(R.color.orange));
         mPro.setStripeWidth(PxUtils.dpToPx(10, this));
         mPro.setCenterTextColor(getResources().getColor(R.color.red));
-        mPro.setmCenterTextSize(PxUtils.spToPx(30,this));
+        mPro.setmCenterTextSize(PxUtils.spToPx(30, this));
 
         findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
             if (progress <= 100) {
                 try {
                     mPro.setPercent(progress);
+                    mProgressBar.setProgress(progress);
                     progress++;
                     mProgressBar.postDelayed(mRunnble, 100);
                 } catch (Exception e) {
